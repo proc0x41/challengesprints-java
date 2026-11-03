@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS evidence (
     cycle_day DATE NOT NULL,
     submitted_at TIMESTAMP WITH TIME ZONE NOT NULL,
     reviewed_at TIMESTAMP WITH TIME ZONE,
+    points_snapshot INTEGER NOT NULL CHECK (points_snapshot BETWEEN 1 AND 10000),
     awarded_points INTEGER NOT NULL DEFAULT 0 CHECK (awarded_points >= 0),
     UNIQUE (mission_id, participant_id, cycle_day)
 );
