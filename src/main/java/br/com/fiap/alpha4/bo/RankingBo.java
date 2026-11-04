@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.List;
 
 @Service
 public class RankingBo {
@@ -25,6 +26,7 @@ public class RankingBo {
         int firstMonth = ((today.getMonthValue() - 1) / 2) * 2 + 1;
         LocalDate start = LocalDate.of(today.getYear(), firstMonth, 1);
         String season = "%d · %02d/%02d".formatted(today.getYear(), firstMonth, firstMonth + 1);
+        if (scope.equals("comunidade") && participant.community().isBlank()) return new Ranking(scope, season, List.of());
         return new Ranking(scope, season, rankings.list(scope, participant, start, start.plusMonths(2)));
     }
 }

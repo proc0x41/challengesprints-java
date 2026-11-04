@@ -10,6 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -29,6 +32,21 @@ public class ApiExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     ResponseEntity<Message> conflict(DataIntegrityViolationException exception) {
         return ResponseEntity.status(409).body(new Message("A operação conflita com um registro existente ou com seu histórico."));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    ResponseEntity<Message> missing(NoResourceFoundException exception) {
+        return ResponseEntity.status(404).body(new Message("Recurso não encontrado."));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    ResponseEntity<Message> method(HttpRequestMethodNotSupportedException exception) {
+        return ResponseEntity.status(405).body(new Message("Método HTTP não permitido para este recurso."));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<Message> media(HttpMediaTypeNotSupportedException exception) {
+        return ResponseEntity.status(415).body(new Message("Envie o conteúdo no formato JSON."));
     }
 
     @ExceptionHandler(Exception.class)

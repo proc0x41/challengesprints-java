@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS participants (
     id VARCHAR(36) PRIMARY KEY,
-    name VARCHAR(60) NOT NULL,
+    name VARCHAR(80) NOT NULL,
     uf VARCHAR(2) NOT NULL,
-    community VARCHAR(60) NOT NULL,
+    community VARCHAR(80) NOT NULL,
     token_hash VARCHAR(64) NOT NULL UNIQUE
 );
 

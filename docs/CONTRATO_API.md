@@ -17,9 +17,11 @@ Retorna **201**:
 {"participant":{"id":"uuid","name":"Pseudônimo de demonstração","uf":"SP","community":"Alpha4"},"token":"token-aleatorio"}
 ```
 
-Todos os campos de `participant` são strings. Pseudônimo e comunidade têm de
-3 a 60 caracteres após retirar espaços nas extremidades; UF precisa ser uma
-das 27 siglas brasileiras. Não envie nomes reais ou outros dados pessoais.
+Todos os campos de `participant` são strings. Pseudônimo tem de 2 a 80
+caracteres após retirar espaços nas extremidades; comunidade é opcional,
+até 80 caracteres, e será normalizada para string vazia se omitida ou null.
+UF precisa ser uma das 27 siglas brasileiras. Não envie nomes reais ou
+outros dados pessoais.
 
 Use `Authorization: Bearer <token>` nas operações pessoais. O banco guarda
 somente SHA-256 do token. A chave administrativa não é este token.
@@ -104,7 +106,8 @@ por pseudônimo e ID; a posição é ordinal. Perfis reais recém-criados podem
 aparecer com zero pontos; não há perfis fictícios no banco inicial.
 
 Estadual usa a UF do próprio perfil; comunidade compara o nome da comunidade
-sem distinguir maiúsculas; amigos inclui o próprio participante e aqueles
+sem distinguir maiúsculas e retorna lista vazia quando o perfil não tem grupo;
+amigos inclui o próprio participante e aqueles
 que ele acompanha via POST /amigos/{id}. É uma lista unilateral de
 acompanhamento, não uma alegação de amizade mútua. O ID precisa ser
 compartilhado pelo participante; o sistema não publica uma busca de perfis.
