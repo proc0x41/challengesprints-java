@@ -192,6 +192,18 @@ class ApiIntegrationTest {
     }
 
     @Test
+    void missingResourcesAndUnsupportedRequestsKeepHttpSemantics() {
+        assertThat(request(HttpMethod.GET, "/nao-encontrado", null, null, false).getStatusCode().value()).isEqualTo(404);
+        assertThat(request(HttpMethod.POST, "/ranking", Map.of(), null, false).getStatusCode().value()).isEqualTo(405);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        var response = rest.exchange("/api/participantes", HttpMethod.POST,
+            new HttpEntity<>("texto sem JSON", headers), JsonNode.class);
+        assertThat(response.getStatusCode().value()).isEqualTo(415);
+        assertThat(response.getBody().path("message").asText()).doesNotContain("Exception", "SELECT", "token_hash");
+    }
+
+    @Test
     void corsAllowsOnlyConfiguredOrigins() {
         HttpHeaders headers = new HttpHeaders();
         headers.setOrigin("http://localhost:5173");
