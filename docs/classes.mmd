@@ -1,0 +1,153 @@
+classDiagram
+    class Mission {
+        <<record>>
+        String id
+        String title
+        String description
+        Category category
+        int points
+        boolean requiresEvidence
+        String status
+    }
+    class Participant {
+        <<record>>
+        String id
+        String name
+        String uf
+        String community
+    }
+    class Evidence {
+        <<record>>
+        String id
+        String missionId
+        String missionTitle
+        String participantId
+        String text
+        String status
+        LocalDate cycleDay
+        OffsetDateTime submittedAt
+        OffsetDateTime reviewedAt
+        int pointsSnapshot
+        int awardedPoints
+    }
+    class Category {
+        <<enumeration>>
+        AMBIENTAL
+        SOCIAL
+        GOVERNANCA
+        from(value) Category
+        value() String
+    }
+    class Ranking {
+        <<record>>
+        String scope
+        String season
+        List~Entry~ entries
+    }
+    class Entry {
+        <<record>>
+        String id
+        int position
+        String name
+        long points
+    }
+    class ConnectionFactory {
+        JdbcTemplate template
+        jdbc() JdbcTemplate
+    }
+    class MissionDao {
+        list(participantId, day) List~Mission~
+        find(id, participantId, day) Optional~Mission~
+        insert(mission)
+        update(mission)
+        delete(id)
+        count() int
+    }
+    class ParticipantDao {
+        insert(participant, tokenHash) Participant
+        find(id) Optional~Participant~
+        findByToken(tokenHash) Optional~Participant~
+        update(participant) Participant
+        delete(id)
+        lock(id)
+        friends(participantId) List~Participant~
+        isFriend(participantId, friendId) boolean
+        addFriend(participantId, friendId)
+        deleteFriend(participantId, friendId) int
+    }
+    class EvidenceDao {
+        findToday(missionId, participantId, day) Optional~Evidence~
+        lock(id) Optional~Evidence~
+        own(participantId) List~Evidence~
+        pending() List~Evidence~
+        insert(evidence)
+        resubmit(id, text, now)
+        review(id, status, now, points)
+    }
+    class RankingDao {
+        list(scope, participant, start, end) List~Entry~
+    }
+    class MissionBo {
+        list(participant) List~Mission~
+        find(id, participant) Mission
+        create(input) Mission
+        update(id, input) Mission
+        delete(id)
+    }
+    class ParticipantBo {
+        create(input) Session
+        update(current, input) Participant
+        delete(current)
+        friends(current) List~Participant~
+        addFriend(current, friendId)
+        deleteFriend(current, friendId)
+    }
+    class EvidenceBo {
+        submit(missionId, participant, input) Message
+        own(participant) List~Evidence~
+        pending() List~Evidence~
+        review(id, input) Message
+    }
+    class RankingBo {
+        get(scope, participant) Ranking
+    }
+    class SessionBo {
+        newToken() String
+        hash(token) String
+        requireParticipant(authorization) Participant
+        optionalParticipant(authorization) Participant
+        requireAdmin(providedKey)
+    }
+    class MissionResource
+    class ParticipantResource
+    class EvidenceResource
+    class RankingResource
+    class CorsFilter {
+        Set~String~ origins
+        doFilterInternal(request, response, chain)
+    }
+
+    Mission --> Category
+    Evidence --> Mission : missionId
+    Evidence --> Participant : participantId
+    Ranking *-- Entry
+    MissionResource --> MissionBo
+    ParticipantResource --> ParticipantBo
+    EvidenceResource --> EvidenceBo
+    RankingResource --> RankingBo
+    MissionResource --> SessionBo
+    ParticipantResource --> SessionBo
+    EvidenceResource --> SessionBo
+    RankingResource --> SessionBo
+    MissionBo --> MissionDao
+    ParticipantBo --> ParticipantDao
+    ParticipantBo --> SessionBo
+    EvidenceBo --> EvidenceDao
+    EvidenceBo --> ParticipantDao
+    EvidenceBo --> MissionBo
+    RankingBo --> RankingDao
+    SessionBo --> ParticipantDao
+    MissionDao --> ConnectionFactory
+    ParticipantDao --> ConnectionFactory
+    EvidenceDao --> ConnectionFactory
+    RankingDao --> ConnectionFactory

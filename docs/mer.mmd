@@ -1,0 +1,37 @@
+erDiagram
+    PARTICIPANTS ||--o{ EVIDENCE : envia
+    MISSIONS ||--o{ EVIDENCE : recebe
+    PARTICIPANTS ||--o{ FRIENDSHIPS : acompanha
+    PARTICIPANTS ||--o{ FRIENDSHIPS : acompanhado
+
+    PARTICIPANTS {
+        varchar36 id PK
+        varchar80 name
+        varchar2 uf
+        varchar80 community
+        varchar64 token_hash UK
+    }
+    MISSIONS {
+        varchar36 id PK
+        varchar120 title
+        varchar3000 description
+        varchar20 category
+        integer points
+        boolean requires_evidence
+    }
+    EVIDENCE {
+        varchar36 id PK
+        varchar36 mission_id FK
+        varchar36 participant_id FK
+        varchar2000 evidence_text
+        varchar20 status
+        date cycle_day
+        timestamptz submitted_at
+        timestamptz reviewed_at
+        integer points_snapshot
+        integer awarded_points
+    }
+    FRIENDSHIPS {
+        varchar36 participant_id PK,FK
+        varchar36 friend_id PK,FK
+    }
