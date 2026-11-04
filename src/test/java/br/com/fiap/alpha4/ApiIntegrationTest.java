@@ -192,6 +192,46 @@ class ApiIntegrationTest {
     }
 
     @Test
+    void participantLimitsAreAppliedAfterTrimming() {
+        var accepted = request(HttpMethod.POST, "/participantes",
+            Map.of("name", "  " + "A".repeat(80) + "  ", "uf", "SP", "community", "  " + "B".repeat(80) + "  "), null, false);
+        assertThat(accepted.getStatusCode().value()).isEqualTo(201);
+        assertThat(accepted.getBody().path("participant").path("name").asText()).hasSize(80);
+        assertThat(accepted.getBody().path("participant").path("community").asText()).hasSize(80);
+        assertThat(request(HttpMethod.POST, "/participantes", Map.of("name", "A".repeat(81), "uf", "SP"), null, false).getStatusCode().value()).isEqualTo(400);
+        assertThat(request(HttpMethod.POST, "/participantes", Map.of("name", "Participante", "uf", "SP", "community", "B".repeat(81)), null, false).getStatusCode().value()).isEqualTo(400);
+    }
+
+    @Test
+    void rejectsScalarCoercionInsteadOfSilentlyChangingJsonTypes() {
+        for (Object invalidPoints : List.of(20.9, 20.0, "20", true)) {
+            Map<String, Object> body = new HashMap<>(missionBody(20));
+            body.put("points", invalidPoints);
+            assertThat(request(HttpMethod.POST, "/missoes", body, null, true).getStatusCode().value())
+                .as("points deve ser inteiro JSON: %s", invalidPoints).isEqualTo(400);
+        }
+        for (Object invalidBoolean : List.of("false", "true", 0, 1)) {
+            Map<String, Object> body = new HashMap<>(missionBody(20));
+            body.put("requiresEvidence", invalidBoolean);
+            assertThat(request(HttpMethod.POST, "/missoes", body, null, true).getStatusCode().value())
+                .as("requiresEvidence deve ser boolean JSON: %s", invalidBoolean).isEqualTo(400);
+        }
+        for (String field : List.of("name", "community", "uf")) {
+            for (Object invalidString : List.of(123, 20.9, true)) {
+                Map<String, Object> body = new HashMap<>(Map.of("name", "Participante", "uf", "SP", "community", "Alpha4"));
+                body.put(field, invalidString);
+                assertThat(request(HttpMethod.POST, "/participantes", body, null, false).getStatusCode().value())
+                    .as("%s deve ser string JSON: %s", field, invalidString).isEqualTo(400);
+            }
+        }
+        Map<String, Object> valid = new HashMap<>(missionBody(20));
+        valid.put("requiresEvidence", false);
+        assertThat(request(HttpMethod.POST, "/missoes", valid, null, true).getStatusCode().value()).isEqualTo(201);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM participants", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM missions", Integer.class)).isEqualTo(1);
+    }
+
+    @Test
     void missingResourcesAndUnsupportedRequestsKeepHttpSemantics() {
         assertThat(request(HttpMethod.GET, "/nao-encontrado", null, null, false).getStatusCode().value()).isEqualTo(404);
         assertThat(request(HttpMethod.POST, "/ranking", Map.of(), null, false).getStatusCode().value()).isEqualTo(405);

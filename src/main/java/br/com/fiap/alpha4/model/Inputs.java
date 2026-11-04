@@ -14,9 +14,9 @@ public final class Inputs {
         @NotNull Boolean requiresEvidence) { }
 
     public record ParticipantInput(
-        @NotBlank @Size(min = 2, max = 80) String name,
+        @NotBlank String name,
         @NotBlank @Pattern(regexp = "[A-Z]{2}") String uf,
-        @Size(max = 80) String community) { }
+        String community) { }
 
     public record EvidenceInput(@NotBlank @Size(min = 10, max = 2000) String text) { }
 

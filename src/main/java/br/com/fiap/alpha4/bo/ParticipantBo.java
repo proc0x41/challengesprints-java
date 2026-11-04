@@ -55,7 +55,8 @@ public class ParticipantBo {
         if (!UFS.contains(input.uf())) throw ApiException.badRequest("Selecione uma UF brasileira válida.");
         String name = input.name().trim();
         String community = input.community() == null ? "" : input.community().trim();
-        if (name.length() < 2) throw ApiException.badRequest("O pseudônimo precisa ter pelo menos dois caracteres.");
+        if (name.length() < 2 || name.length() > 80) throw ApiException.badRequest("O pseudônimo precisa ter de dois a 80 caracteres.");
+        if (community.length() > 80) throw ApiException.badRequest("A comunidade pode ter até 80 caracteres.");
         return new Participant(id, name, input.uf(), community);
     }
 }
