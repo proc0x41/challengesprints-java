@@ -170,11 +170,11 @@ Turma **1TDSPW**, FIAP. Identidades conforme `Alpha4_Sprint3.pdf` fornecido.
 
 | Nome | RM | Contato |
 | --- | --- | --- |
-| Vinicius de Oliveira | 561862 | 561862@fiap.com.br |
-| Robison Custodio Junior | 572866 | 572866@fiap.com.br |
-| Lucas Fernando Silva | 564848 | 564848@fiap.com.br |
-| Thiago Shimizu Sodré dos Santos | 572867 | 572867@fiap.com.br |
-| Arthur Mendes Garcia | 571703 | 571703@fiap.com.br |
+| Vinicius de Oliveira | 561862 | rm561862@fiap.com.br |
+| Robison Custodio Junior | 572866 | rm572866@fiap.com.br |
+| Lucas Fernando Silva | 564848 | rm564848@fiap.com.br |
+| Thiago Shimizu Sodré dos Santos | 572867 | rm572867@fiap.com.br |
+| Arthur Mendes Garcia | 571703 | rm571703@fiap.com.br |
 
 O histórico usa Conventional Commits com descrições em português, identidades
 locais alternadas e branches GitFlow `main`, `develop`, `feature/*`. Não há
