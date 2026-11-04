@@ -56,6 +56,7 @@ classDiagram
         jdbc() JdbcTemplate
     }
     class MissionDao {
+        JdbcTemplate jdbc
         list(participantId, day) List~Mission~
         find(id, participantId, day) Optional~Mission~
         insert(mission)
@@ -64,6 +65,7 @@ classDiagram
         count() int
     }
     class ParticipantDao {
+        JdbcTemplate jdbc
         insert(participant, tokenHash) Participant
         find(id) Optional~Participant~
         findByToken(tokenHash) Optional~Participant~
@@ -76,6 +78,7 @@ classDiagram
         deleteFriend(participantId, friendId) int
     }
     class EvidenceDao {
+        JdbcTemplate jdbc
         findToday(missionId, participantId, day) Optional~Evidence~
         lock(id) Optional~Evidence~
         own(participantId) List~Evidence~
@@ -85,9 +88,12 @@ classDiagram
         review(id, status, now, points)
     }
     class RankingDao {
+        JdbcTemplate jdbc
         list(scope, participant, start, end) List~Entry~
     }
     class MissionBo {
+        MissionDao missions
+        Clock clock
         list(participant) List~Mission~
         find(id, participant) Mission
         create(input) Mission
@@ -95,6 +101,8 @@ classDiagram
         delete(id)
     }
     class ParticipantBo {
+        ParticipantDao participants
+        SessionBo sessions
         create(input) Session
         update(current, input) Participant
         delete(current)
@@ -103,25 +111,104 @@ classDiagram
         deleteFriend(current, friendId)
     }
     class EvidenceBo {
+        EvidenceDao evidence
+        ParticipantDao participants
+        MissionBo missions
+        Clock clock
         submit(missionId, participant, input) Message
         own(participant) List~Evidence~
         pending() List~Evidence~
         review(id, input) Message
     }
     class RankingBo {
+        RankingDao rankings
+        Clock clock
         get(scope, participant) Ranking
     }
     class SessionBo {
+        ParticipantDao participants
+        String adminKey
+        SecureRandom random
         newToken() String
         hash(token) String
         requireParticipant(authorization) Participant
         optionalParticipant(authorization) Participant
         requireAdmin(providedKey)
     }
-    class MissionResource
-    class ParticipantResource
-    class EvidenceResource
-    class RankingResource
+    class MissionResource {
+        MissionBo missions
+        SessionBo sessions
+        list(authorization) List~Mission~
+        find(id, authorization) Mission
+        create(adminKey, input) Mission
+        update(id, adminKey, input) Mission
+        delete(id, adminKey)
+    }
+    class ParticipantResource {
+        ParticipantBo participants
+        SessionBo sessions
+        create(input) Session
+        me(authorization) Participant
+        update(authorization, input) Participant
+        delete(authorization)
+        friends(authorization) List~Participant~
+        addFriend(id, authorization)
+        deleteFriend(id, authorization)
+    }
+    class EvidenceResource {
+        EvidenceBo evidence
+        SessionBo sessions
+        submit(id, authorization, input) Message
+        own(authorization) List~Evidence~
+        pending(adminKey) List~Evidence~
+        review(id, adminKey, input) Message
+    }
+    class RankingResource {
+        RankingBo rankings
+        SessionBo sessions
+        get(scope, authorization) Ranking
+    }
+    class HealthResource {
+        ConnectionFactory factory
+        health() Map~String,String~
+    }
+    class Inputs {
+        <<DTO container>>
+    }
+    class MissionInput {
+        <<record>>
+        String title
+        String description
+        Category category
+        int points
+        Boolean requiresEvidence
+    }
+    class ParticipantInput {
+        <<record>>
+        String name
+        String uf
+        String community
+    }
+    class EvidenceInput {
+        <<record>>
+        String text
+    }
+    class ReviewInput {
+        <<record>>
+        String status
+    }
+    class Session {
+        <<record>>
+        Participant participant
+        String token
+    }
+    class Message {
+        <<record>>
+        String message
+    }
+    class StrictJsonConfig {
+        strictJsonTypes() Jackson2ObjectMapperBuilderCustomizer
+    }
     class CorsFilter {
         Set~String~ origins
         doFilterInternal(request, response, chain)
@@ -151,3 +238,15 @@ classDiagram
     ParticipantDao --> ConnectionFactory
     EvidenceDao --> ConnectionFactory
     RankingDao --> ConnectionFactory
+    HealthResource --> ConnectionFactory
+    Inputs *-- MissionInput
+    Inputs *-- ParticipantInput
+    Inputs *-- EvidenceInput
+    Inputs *-- ReviewInput
+    Inputs *-- Session
+    Inputs *-- Message
+    MissionResource ..> MissionInput
+    ParticipantResource ..> ParticipantInput
+    EvidenceResource ..> EvidenceInput
+    EvidenceResource ..> ReviewInput
+    Session --> Participant
