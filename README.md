@@ -118,7 +118,7 @@ Fontes dos diagramas: [MER](docs/mer.mmd) e
 ```powershell
 .\mvnw.cmd test
 .\mvnw.cmd package
-java -jar target/soul-up-api-0.1.0.jar
+java -jar target/soul-up-api-0.1.1.jar
 ```
 
 A suíte verifica CRUD, limites, token armazenado por hash, perfis opcionais,
