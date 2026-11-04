@@ -1,0 +1,27 @@
+classDiagram
+    direction TB
+    class MissionDao {
+        JdbcTemplate jdbc
+        list(participantId, day) List~Mission~
+        find(id, participantId, day) Optional~Mission~
+        insert(mission)
+        update(mission)
+        delete(id)
+        count() int
+    }
+    class EvidenceDao {
+        JdbcTemplate jdbc
+        findToday(missionId, participantId, day) Optional~Evidence~
+        lock(id) Optional~Evidence~
+        own(participantId) List~Evidence~
+        pending() List~Evidence~
+        insert(evidence)
+        resubmit(id, text, now)
+        review(id, status, now, points)
+    }
+    class ConnectionFactory {
+        JdbcTemplate template
+        jdbc() JdbcTemplate
+    }
+    MissionDao --> ConnectionFactory
+    EvidenceDao --> ConnectionFactory

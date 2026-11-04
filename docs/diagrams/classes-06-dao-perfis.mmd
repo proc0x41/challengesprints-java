@@ -1,0 +1,25 @@
+classDiagram
+    direction TB
+    class ParticipantDao {
+        JdbcTemplate jdbc
+        insert(participant, tokenHash) Participant
+        find(id) Optional~Participant~
+        findByToken(tokenHash) Optional~Participant~
+        update(participant) Participant
+        delete(id)
+        lock(id)
+        friends(participantId) List~Participant~
+        isFriend(participantId, friendId) boolean
+        addFriend(participantId, friendId)
+        deleteFriend(participantId, friendId) int
+    }
+    class RankingDao {
+        JdbcTemplate jdbc
+        list(scope, participant, start, end) List~Entry~
+    }
+    class ConnectionFactory {
+        JdbcTemplate template
+        jdbc() JdbcTemplate
+    }
+    ParticipantDao --> ConnectionFactory
+    RankingDao --> ConnectionFactory
