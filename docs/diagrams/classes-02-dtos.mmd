@@ -1,0 +1,37 @@
+classDiagram
+    direction TB
+    class MissionInput {
+        <<record>>
+        String title
+        String description
+        Category category
+        int points
+        Boolean requiresEvidence
+    }
+    class ParticipantInput {
+        <<record>>
+        String name
+        String uf
+        String community
+    }
+    class EvidenceInput {
+        <<record>>
+        String text
+    }
+    class ReviewInput {
+        <<record>>
+        String status
+    }
+    class Session {
+        <<record>>
+        Participant participant
+        String token
+    }
+    class Message {
+        <<record>>
+        String message
+    }
+    class Participant {
+        <<referencia>>
+    }
+    Session --> Participant

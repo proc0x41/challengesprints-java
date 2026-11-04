@@ -134,10 +134,35 @@ exata em `CORS_ORIGINS`. H2 dentro de um container sem volume perde dados
 ao substituir o container, por isso não é a configuração indicada para o
 deploy persistente. Não exponha o banco diretamente à internet.
 
-**Pendências externas:** o repositório remoto Java e o serviço de hospedagem
-ainda precisam ser definidos pelo grupo. Não há URL de deploy publicada
-nesta etapa. A documentação PDF final deve incorporar prints reais do
-frontend integrado; sua produção está coordenada com o projeto frontend.
+Repositório: [proc0x41/challengesprints-java](https://github.com/proc0x41/challengesprints-java).
+A [documentação PDF](output/pdf/Alpha4_Sprint4_Java.pdf) inclui capa, escopo,
+endpoints, capturas reais do frontend integrado, MER, classes e execução.
+
+**Pendência externa:** não há URL de deploy em nuvem publicada nesta etapa.
+O serviço de hospedagem e o banco remoto ainda precisam ser configurados.
+
+### Reproduzir a documentação e gerar o ZIP
+
+As imagens usadas estão em `docs/screenshots`, copiadas de capturas reais do
+frontend integrado em 03/11/2026. Não são telas geradas por IA ou imagens
+fictícias. Os diagramas têm fontes Mermaid canônicas e recortes por camada.
+
+```powershell
+python -m pip install -r scripts/requirements-docs.txt
+python scripts/build_docs.py
+python scripts/render_pdf.py
+python scripts/package_sources.py
+```
+
+Para regenerar os SVGs, é necessário Node/npm e um Chromium disponível:
+`scripts/render-diagrams.ps1 -BrowserPath 'caminho/do/chrome.exe'`. O script
+usa Mermaid CLI 12.2.0 e deriva os recortes de `docs/classes.mmd`. O PDF usa
+Segoe UI quando disponível ou DejaVu Sans em Linux; caso contrário, Helvetica.
+As páginas PNG de revisão ficam em `tmp/pdfs/review` e não são versionadas.
+
+O ZIP e seu SHA-256 ficam em `entregas/`. O empacotamento usa uma lista
+permitida de fontes/documentação, valida a integridade do ZIP e exclui banco,
+tokens, `.git`, `target` e arquivos temporários. O PDF final está incluído.
 
 ## Autores e contato
 

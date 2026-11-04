@@ -1,0 +1,39 @@
+classDiagram
+    direction TB
+    class ParticipantResource {
+        ParticipantBo participants
+        SessionBo sessions
+        create(input) Session
+        me(authorization) Participant
+        update(authorization, input) Participant
+        delete(authorization)
+        friends(authorization) List~Participant~
+        addFriend(id, authorization)
+        deleteFriend(id, authorization)
+    }
+    class RankingResource {
+        RankingBo rankings
+        SessionBo sessions
+        get(scope, authorization) Ranking
+    }
+    class CorsFilter {
+        Set~String~ origins
+        doFilterInternal(request, response, chain)
+    }
+    class StrictJsonConfig {
+        strictJsonTypes() Jackson2ObjectMapperBuilderCustomizer
+    }
+    class ParticipantBo {
+        <<referencia>>
+    }
+    class RankingBo {
+        <<referencia>>
+    }
+    class SessionBo {
+        <<referencia>>
+    }
+    ParticipantResource --> ParticipantBo
+    RankingResource --> RankingBo
+    ParticipantResource --> SessionBo
+    RankingResource --> SessionBo
+    ParticipantBo --> SessionBo

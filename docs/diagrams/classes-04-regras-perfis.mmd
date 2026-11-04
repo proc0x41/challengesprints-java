@@ -1,0 +1,37 @@
+classDiagram
+    direction TB
+    class ParticipantBo {
+        ParticipantDao participants
+        SessionBo sessions
+        create(input) Session
+        update(current, input) Participant
+        delete(current)
+        friends(current) List~Participant~
+        addFriend(current, friendId)
+        deleteFriend(current, friendId)
+    }
+    class RankingBo {
+        RankingDao rankings
+        Clock clock
+        get(scope, participant) Ranking
+    }
+    class SessionBo {
+        ParticipantDao participants
+        String adminKey
+        SecureRandom random
+        newToken() String
+        hash(token) String
+        requireParticipant(authorization) Participant
+        optionalParticipant(authorization) Participant
+        requireAdmin(providedKey)
+    }
+    class ParticipantDao {
+        <<referencia>>
+    }
+    class RankingDao {
+        <<referencia>>
+    }
+    ParticipantBo --> ParticipantDao
+    ParticipantBo --> SessionBo
+    RankingBo --> RankingDao
+    SessionBo --> ParticipantDao

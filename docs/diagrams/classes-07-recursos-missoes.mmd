@@ -1,0 +1,41 @@
+classDiagram
+    direction TB
+    class MissionResource {
+        MissionBo missions
+        SessionBo sessions
+        list(authorization) List~Mission~
+        find(id, authorization) Mission
+        create(adminKey, input) Mission
+        update(id, adminKey, input) Mission
+        delete(id, adminKey)
+    }
+    class EvidenceResource {
+        EvidenceBo evidence
+        SessionBo sessions
+        submit(id, authorization, input) Message
+        own(authorization) List~Evidence~
+        pending(adminKey) List~Evidence~
+        review(id, adminKey, input) Message
+    }
+    class HealthResource {
+        ConnectionFactory factory
+        health() Map~String,String~
+    }
+    class MissionBo {
+        <<referencia>>
+    }
+    class EvidenceBo {
+        <<referencia>>
+    }
+    class SessionBo {
+        <<referencia>>
+    }
+    class ConnectionFactory {
+        <<referencia>>
+    }
+    MissionResource --> MissionBo
+    EvidenceResource --> EvidenceBo
+    MissionResource --> SessionBo
+    EvidenceResource --> SessionBo
+    EvidenceBo --> MissionBo
+    HealthResource --> ConnectionFactory
