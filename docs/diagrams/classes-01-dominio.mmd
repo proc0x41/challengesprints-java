@@ -1,0 +1,58 @@
+classDiagram
+    direction TB
+    class Mission {
+        <<record>>
+        String id
+        String title
+        String description
+        Category category
+        int points
+        boolean requiresEvidence
+        String status
+    }
+    class Participant {
+        <<record>>
+        String id
+        String name
+        String uf
+        String community
+    }
+    class Evidence {
+        <<record>>
+        String id
+        String missionId
+        String missionTitle
+        String participantId
+        String text
+        String status
+        LocalDate cycleDay
+        OffsetDateTime submittedAt
+        OffsetDateTime reviewedAt
+        int pointsSnapshot
+        int awardedPoints
+    }
+    class Category {
+        <<enumeration>>
+        AMBIENTAL
+        SOCIAL
+        GOVERNANCA
+        from(value) Category
+        value() String
+    }
+    class Ranking {
+        <<record>>
+        String scope
+        String season
+        List~Entry~ entries
+    }
+    class Entry {
+        <<record>>
+        String id
+        int position
+        String name
+        long points
+    }
+    Mission --> Category
+    Evidence --> Mission : missionId
+    Evidence --> Participant : participantId
+    Ranking *-- Entry

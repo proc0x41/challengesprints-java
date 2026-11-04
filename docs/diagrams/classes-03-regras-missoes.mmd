@@ -1,0 +1,45 @@
+classDiagram
+    direction TB
+    class MissionBo {
+        MissionDao missions
+        Clock clock
+        list(participant) List~Mission~
+        find(id, participant) Mission
+        create(input) Mission
+        update(id, input) Mission
+        delete(id)
+    }
+    class EvidenceBo {
+        EvidenceDao evidence
+        ParticipantDao participants
+        MissionBo missions
+        Clock clock
+        submit(missionId, participant, input) Message
+        own(participant) List~Evidence~
+        pending() List~Evidence~
+        review(id, input) Message
+    }
+    class SessionBo {
+        ParticipantDao participants
+        String adminKey
+        SecureRandom random
+        newToken() String
+        hash(token) String
+        requireParticipant(authorization) Participant
+        optionalParticipant(authorization) Participant
+        requireAdmin(providedKey)
+    }
+    class MissionDao {
+        <<referencia>>
+    }
+    class EvidenceDao {
+        <<referencia>>
+    }
+    class ParticipantDao {
+        <<referencia>>
+    }
+    MissionBo --> MissionDao
+    EvidenceBo --> EvidenceDao
+    EvidenceBo --> ParticipantDao
+    EvidenceBo --> MissionBo
+    SessionBo --> ParticipantDao

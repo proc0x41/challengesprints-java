@@ -5,3 +5,7 @@ data/
 .idea/
 .vscode/
 entregas/
+tmp/
+__pycache__/
+*.pyc
+node_modules/

@@ -1,0 +1,13 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Segoe UI",
+    "fontSize": "17px",
+    "primaryColor": "#e5f6ef",
+    "primaryTextColor": "#111c3d",
+    "primaryBorderColor": "#087f68",
+    "lineColor": "#111c3d"
+  },
+  "class": { "htmlLabels": false },
+  "flowchart": { "htmlLabels": false }
+}
