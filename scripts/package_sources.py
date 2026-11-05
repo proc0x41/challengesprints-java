@@ -10,7 +10,7 @@ if not PDF.is_file():
 
 allowed_files = [
     'pom.xml', 'README.md', 'Dockerfile', '.dockerignore', '.gitignore',
-    '.gitattributes', '.env.example', 'mvnw', 'mvnw.cmd',
+    '.gitattributes', '.env.example', 'mvnw', 'mvnw.cmd', 'render.yaml',
 ]
 allowed_dirs = ['src', '.mvn', 'docs', 'scripts', 'output/pdf']
 files = [ROOT / name for name in allowed_files]
