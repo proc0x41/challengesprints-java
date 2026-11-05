@@ -1,0 +1,45 @@
+# Instalação nova: API + PostgreSQL gerenciado, com credenciais por referência.
+services:
+  - type: web
+    name: challengesprints-java
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: CORS_ORIGINS
+        value: https://chellengesprints-alpha4.vercel.app
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: alpha4-soulup-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: alpha4-soulup-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: alpha4-soulup-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: alpha4-soulup-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: alpha4-soulup-db
+          property: password
+      - key: DB_SSL_MODE
+        value: require
+databases:
+  - name: alpha4-soulup-db
+    plan: free
+    region: oregon
+    postgresMajorVersion: "17"
+    databaseName: soulup
+    user: alpha4
+    ipAllowList: []

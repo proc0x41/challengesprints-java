@@ -251,6 +251,23 @@ class ApiIntegrationTest {
         var allowed = rest.exchange("/api/participantes", HttpMethod.OPTIONS, new HttpEntity<>(headers), String.class);
         assertThat(allowed.getStatusCode().value()).isEqualTo(204);
         assertThat(allowed.getHeaders().getAccessControlAllowOrigin()).isEqualTo("http://localhost:5173");
+        headers.setOrigin("https://chellengesprints-alpha4.vercel.app");
+        headers.setAccessControlRequestHeaders(List.of("Content-Type", "Authorization"));
+        var production = rest.exchange("/api/participantes", HttpMethod.OPTIONS,
+            new HttpEntity<>(headers), String.class);
+        assertThat(production.getStatusCode().value()).isEqualTo(204);
+        assertThat(production.getHeaders().getAccessControlAllowOrigin())
+            .isEqualTo("https://chellengesprints-alpha4.vercel.app");
+        assertThat(production.getHeaders().getAccessControlAllowHeaders())
+            .contains("Content-Type", "Authorization");
+        var missions = rest.exchange("/api/missoes", HttpMethod.GET,
+            new HttpEntity<>(headers), String.class);
+        assertThat(missions.getStatusCode().value()).isEqualTo(200);
+        assertThat(missions.getHeaders().getAccessControlAllowOrigin())
+            .isEqualTo("https://chellengesprints-alpha4.vercel.app");
+        headers.setOrigin("https://chellengesprints-alpha4.vercel.app.evil.example");
+        assertThat(rest.exchange("/api/participantes", HttpMethod.OPTIONS,
+            new HttpEntity<>(headers), String.class).getStatusCode().value()).isEqualTo(403);
         headers.setOrigin("https://origem-nao-autorizada.example");
         assertThat(rest.exchange("/api/participantes", HttpMethod.OPTIONS, new HttpEntity<>(headers), String.class).getStatusCode().value()).isEqualTo(403);
         assertThat(request(HttpMethod.GET, "/health", null, null, false).getBody().path("status").asText()).isEqualTo("ok");
