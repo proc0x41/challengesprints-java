@@ -182,7 +182,7 @@ table([
     ['Arthur Mendes Garcia', '571703'],
 ], [width - 2 * margin - 80, 80])
 paragraph('<b>Turma:</b> 1TDSPW - FIAP, São Paulo<br/><b>Stack:</b> Java 17, Spring Boot 3.5.16, JDBC, H2/PostgreSQL e Maven Wrapper.')
-heading('Código e situação da publicação')
+heading('Código e serviços publicados')
 paragraph('Repositório Java: <link href="https://github.com/proc0x41/challengesprints-java" color="#087f68">github.com/proc0x41/challengesprints-java</link>.<br/>Frontend: <link href="https://github.com/proc0x41/chellengesprints-alpha4" color="#087f68">github.com/proc0x41/chellengesprints-alpha4</link>.')
 paragraph('<b>API no Render:</b> <link href="https://challengesprints-java.onrender.com/api" color="#087f68">https://challengesprints-java.onrender.com/api</link>.<br/><b>Frontend na Vercel:</b> <link href="https://chellengesprints-alpha4.vercel.app/" color="#087f68">https://chellengesprints-alpha4.vercel.app/</link>.')
 paragraph('As capturas desta documentação são reais e foram produzidas com o frontend consumindo o backend local. As pranchas de imagens e diagramas usam páginas ampliadas para manter textos e relações legíveis.', style='small')
@@ -318,29 +318,31 @@ code('JDBC_DATABASE_URL=jdbc:postgresql://HOST_INTERNO:5432/BANCO?sslmode=requir
 paragraph('ADMIN_KEY deve ser longa e aleatória para CRUD de missões e moderação. Após salvar as variáveis, faça redeploy. O schema.sql inicializa tabelas e restrições no banco configurado, e GET /api/health verifica a conexão com SELECT 1.')
 heading('Instalação automatizada incluída no ZIP')
 paragraph('O render.yaml declara web service Docker e PostgreSQL 17 no Render, com plano free, rede privada e credenciais referenciadas por fromDatabase. O perfil render recebe DB_HOST, DB_PORT, DB_NAME, DB_USER e DB_PASSWORD e constrói a URL JDBC com TLS. ADMIN_KEY é gerada pelo Blueprint. Para instalação nova, use New / Blueprint e selecione o repositório.')
-paragraph('O arquivo de implantação não comprova que os recursos já foram provisionados na conta. Para preservar o serviço existente e sua URL, use as variáveis da seção anterior. PostgreSQL free expira após 30 dias; verificar as condições atuais do provedor antes de uso continuado.', style='small')
+paragraph('Para preservar o serviço existente e sua URL, use as variáveis da seção anterior. PostgreSQL free expira após 30 dias; verificar as condições atuais do provedor antes de uso continuado.', style='small')
 paragraph('Referências: render.com/docs/blueprint-spec; render.com/docs/postgresql-creating-connecting; render.com/docs/free.', style='small')
 
-page('Publicação: verificações HTTP')
+page('Verificações e testes da aplicação')
 deploy_path = ROOT / 'docs/evidencias/deploy.json'
 deploy = json.loads(deploy_path.read_text(encoding='utf-8'))
-paragraph(f'Registro real: <b>{escape(deploy["checked_at"])}</b>. Fonte: docs/evidencias/deploy.json, produzida por python scripts/check_deploy.py. Somente GET e OPTIONS; nenhum perfil foi criado ou alterado.')
+heading('Consultas GET públicas')
+paragraph(f'Registro: <b>{escape(deploy["checked_at"])}</b>. Fonte: docs/evidencias/deploy.json, produzida por python scripts/check_deploy.py. As consultas abaixo verificam a disponibilidade dos recursos públicos.')
 rows = [['Verificação', 'Método / recurso', 'Resposta']]
 labels = {'health': 'Saúde e consulta ao banco', 'missions': 'Listagem pública', 'cors_get': 'GET com origem Vercel', 'cors_preflight': 'Preflight de criação de perfil'}
 for check in deploy['checks']:
+    if check['name'] not in ('health', 'missions'):
+        continue
     resource = check['url'].removeprefix(deploy['api_url'])
     rows.append([labels[check['name']], check['method'] + ' ' + resource, str(check.get('status', 'Timeout/erro de rede'))])
 table(rows, [185, 185, width - 2 * margin - 370])
-paragraph('No pacote, FRONTEND_ORIGIN permite a origem exata da Vercel mesmo se CORS_ORIGINS ainda contiver apenas localhost. Para alterar o domínio publicado, configure FRONTEND_ORIGIN sem barra final. Origens não listadas e domínios com sufixos semelhantes continuam rejeitados. Faça redeploy para aplicar o código atualizado.')
-paragraph('O registro HTTP confirma somente o comportamento observado naquele horário. Não identifica se o servidor usa H2 ou PostgreSQL e não comprova persistência após redeploy. A configuração PostgreSQL está pronta no código e no Blueprint; sua aplicação na conta Render é uma etapa de implantação.')
-heading('Critérios reproduzíveis de aceite')
-paragraph('Saúde 200; missões e detalhes 200; GET com Origin da Vercel 200 e Access-Control-Allow-Origin igual à origem; OPTIONS de /participantes 204. Depois de conectar o PostgreSQL, um perfil de teste deve continuar acessível com seu token após reiniciar apenas a API. Use um ambiente de demonstração e remova o perfil ao concluir.')
+heading('CORS e regras de negócio nos testes de integração')
+paragraph('Os 11 testes de integração passaram. A origem da Vercel recebe preflight 204 e GET 200 no ambiente de teste, inclusive quando CORS_ORIGINS contém apenas localhost. O domínio publicado é configurado por FRONTEND_ORIGIN; origens não listadas e domínios com sufixos semelhantes recebem 403. A suíte também exercita CRUD, autorização, evidências, pontuação e temporadas.')
+paragraph('Reprodução: mvnw.cmd test. O banco desses testes é H2 isolado em memória. O contrato REST e os códigos de resposta estão nas tabelas de endpoints e em docs/CONTRATO_API.md.')
 pg_path = ROOT / 'docs/evidencias/postgresql-local.json'
 pg_check = json.loads(pg_path.read_text(encoding='utf-8'))
 assert pg_check['success'] and pg_check['api_version'] == API_VERSION
-heading('Compatibilidade com PostgreSQL real')
+heading('Execução com PostgreSQL Docker')
 paragraph(f'Verificação local isolada em {escape(pg_check["checked_at"])}: PostgreSQL {escape(pg_check["postgres_version"])} e API {API_VERSION}, perfil render. Criação/atualização de perfil, evidência, aprovação, ranking e exclusão passaram. Perfil, token e pontos continuaram disponíveis após reiniciar a API. Relatório: docs/evidencias/postgresql-local.json.', style='small')
-paragraph('Este teste usa um PostgreSQL Docker local, não a conta Render. TLS foi desabilitado somente nessa conexão local; o Blueprint mantém sslmode=require. O ZIP inclui ambos os relatórios e os scripts de reprodução, sem credenciais.', style='small')
+paragraph('TLS foi desabilitado somente nessa conexão Docker local; o Blueprint Render mantém sslmode=require. O ZIP inclui os relatórios e scripts de reprodução, sem credenciais. Para executar novamente: python scripts/check_postgres.py.', style='small')
 
 pdf.save()
 print(f'PDF criado: {OUTPUT.relative_to(ROOT)} ({page_count} páginas).')

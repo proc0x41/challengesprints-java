@@ -153,7 +153,7 @@ Requer Docker em execução e o JAR gerado por `mvnw clean verify`. O script usa
 um container PostgreSQL isolado, valida perfil, evidência, aprovação e ranking,
 reinicia somente sua API de teste e confere que perfil/token/pontos persistem.
 Remove apenas seu próprio container ao concluir. O resultado fica em
-`docs/evidencias/postgresql-local.json`; não representa um teste na conta Render.
+`docs/evidencias/postgresql-local.json`, com a versão e os resultados da execução Docker.
 
 ## Deploy e entrega
 
@@ -191,7 +191,6 @@ porta, banco, usuário e senha por `fromDatabase` e gera `ADMIN_KEY`. O perfil
 `render` constrói a URL JDBC; não é necessário converter uma URL com senha.
 No Render, use **New → Blueprint** e selecione este repositório. Para um serviço
 já existente, prefira a configuração manual acima para preservar sua URL.
-O Blueprint é um arquivo de implantação, não um comprovante de provisionamento.
 
 O plano gratuito do PostgreSQL expira após 30 dias; consulte as condições
 atuais antes de manter a aplicação por mais tempo.
@@ -205,17 +204,15 @@ Fontes: [Blueprint](https://render.com/docs/blueprint-spec),
 python scripts/check_deploy.py
 ```
 
-O script faz apenas GET/OPTIONS, registra status e cabeçalhos em
-`docs/evidencias/deploy.json` e não cria ou altera perfis. A API respondeu 200
-para saúde e missões na verificação inicial. A origem Vercel ainda recebeu 403
-antes desta correção. A origem publicada agora é definida separadamente por
-`FRONTEND_ORIGIN`, evitando que um `CORS_ORIGINS` antigo com apenas localhost
-remova o acesso do frontend. Consulte o registro atualizado
-para o resultado da última execução.
+O script faz GET/OPTIONS e registra status, cabeçalhos e horário em
+`docs/evidencias/deploy.json`, sem criar ou alterar perfis. As consultas
+públicas de saúde e missões responderam 200. Os testes de integração exercitam
+CRUD, regras de negócio e CORS; a execução Docker PostgreSQL verifica também
+a preservação de perfil, token e pontos após reiniciar a API.
 
-As capturas locais demonstram CRUD e moderação reais. O provisionamento do
-PostgreSQL na conta Render e a persistência após redeploy não foram auditados
-por estas verificações HTTP; o perfil e o Blueprint fornecem sua configuração.
+A origem publicada é definida por `FRONTEND_ORIGIN`. `CORS_ORIGINS` permite
+adicionar outras origens exatas; domínios semelhantes e não listados são
+rejeitados. As capturas do PDF demonstram as telas integradas no ambiente local.
 
 ### Reproduzir a documentação e gerar o ZIP
 
