@@ -19,7 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.datasource.url=jdbc:h2:mem:integration;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE",
-    "app.admin-key=admin-key-only-for-automated-tests", "app.seed-demo=false"
+    "app.admin-key=admin-key-only-for-automated-tests", "app.seed-demo=false",
+    "CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173"
 })
 class ApiIntegrationTest {
     @Autowired TestRestTemplate rest;
