@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-11-04T23:31:22.908772-03:00",
+  "success": true,
+  "scope": "PostgreSQL Docker local isolado; nao e o banco da conta Render",
+  "api_version": "0.1.2",
+  "postgres_version": "17.11",
+  "image": "postgres@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b",
+  "profile": "render",
+  "tls": "disable somente no teste local; require no Blueprint",
+  "checks": [
+    "Perfil render conecta ao PostgreSQL real e inicializa o schema",
+    "Criacao, leitura e atualizacao de perfil por HTTP",
+    "Evidencia, aprovacao transacional e credito no ranking",
+    "Perfil, token e pontos preservados apos reiniciar a API",
+    "Exclusao de perfil e relacionamentos sem violacao de FK"
+  ]
+}

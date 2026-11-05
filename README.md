@@ -3,6 +3,19 @@
 API REST de missões sustentáveis, evidências e ranking, construída do zero para
 a Sprint 4. O frontend React consome esta API; a entrega de IA é independente.
 
+## Endereços publicados
+
+| Recurso | URL |
+| --- | --- |
+| API no Render | https://challengesprints-java.onrender.com/api |
+| Saúde e conexão com banco | https://challengesprints-java.onrender.com/api/health |
+| Missões | https://challengesprints-java.onrender.com/api/missoes |
+| Frontend na Vercel | https://chellengesprints-alpha4.vercel.app/ |
+
+O pacote contém a configuração de produção **Spring Boot + PostgreSQL no
+Render** em `render.yaml` e no perfil `application-render.properties`.
+O ambiente local continua usando H2 sem depender de um serviço externo.
+
 ## Tecnologias e ferramentas
 
 - Java JDK 17 ou superior; execução validada com Microsoft OpenJDK 17.0.18.
@@ -51,10 +64,14 @@ no servidor. Não versione segredos nem use `VITE_ADMIN_KEY`.
 | --- | --- |
 | PORT | Porta HTTP; 8080 |
 | ADMIN_KEY | Chave longa e aleatória para CRUD e moderação; vazia desabilita administração com 503 |
-| CORS_ORIGINS | Origens exatas separadas por vírgula; localhost/127.0.0.1:5173 |
+| CORS_ORIGINS | Origens adicionais exatas separadas por vírgula; padrão localhost/127.0.0.1:5173 |
+| FRONTEND_ORIGIN | Origem publicada permitida; padrão `https://chellengesprints-alpha4.vercel.app` |
 | SEED_DEMO | Cadastrar exemplos se a tabela de missões estiver vazia; true |
 | JDBC_DATABASE_URL | JDBC H2 local ou URL `jdbc:postgresql://...` da instância do grupo |
 | DB_USER / DB_PASSWORD | Credenciais do banco; local H2 sa/senha vazia |
+| SPRING_PROFILES_ACTIVE | `render` ativa o perfil PostgreSQL do Blueprint |
+| DB_HOST / DB_PORT / DB_NAME | Endereço interno, porta e nome do PostgreSQL no perfil `render` |
+| DB_SSL_MODE | TLS PostgreSQL no perfil `render`; padrão `require` |
 
 Administração utiliza `X-Admin-Key`. Operações pessoais usam Bearer, obtido
 criando um pseudônimo em `POST /api/participantes`. O banco armazena somente
@@ -118,13 +135,25 @@ Fontes dos diagramas: [MER](docs/mer.mmd) e
 ```powershell
 .\mvnw.cmd test
 .\mvnw.cmd package
-java -jar target/soul-up-api-0.1.1.jar
+java -jar target/soul-up-api-0.1.2.jar
 ```
 
 A suíte verifica CRUD, limites, token armazenado por hash, perfis opcionais,
 evidências corrigidas, snapshot de pontos, envio e aprovação concorrentes,
 reinício à meia-noite de São Paulo, troca de temporada e CORS. Ela usa banco
 separado em memória e não altera `data/soulup.mv.db`.
+
+Compatibilidade real com PostgreSQL e o perfil de produção:
+
+```powershell
+python scripts/check_postgres.py
+```
+
+Requer Docker em execução e o JAR gerado por `mvnw clean verify`. O script usa
+um container PostgreSQL isolado, valida perfil, evidência, aprovação e ranking,
+reinicia somente sua API de teste e confere que perfil/token/pontos persistem.
+Remove apenas seu próprio container ao concluir. O resultado fica em
+`docs/evidencias/postgresql-local.json`; não representa um teste na conta Render.
 
 ## Deploy e entrega
 
@@ -138,8 +167,55 @@ Repositório: [proc0x41/challengesprints-java](https://github.com/proc0x41/chall
 A [documentação PDF](output/pdf/Alpha4_Sprint4_Java.pdf) inclui capa, escopo,
 endpoints, capturas reais do frontend integrado, MER, classes e execução.
 
-**Pendência externa:** não há URL de deploy em nuvem publicada nesta etapa.
-O serviço de hospedagem e o banco remoto ainda precisam ser configurados.
+### PostgreSQL no serviço Render existente
+
+Para manter a URL da API já publicada, crie um Render Postgres na mesma região
+do serviço. Em **Environment** do serviço Java, defina:
+
+```text
+JDBC_DATABASE_URL=jdbc:postgresql://HOST_INTERNO:5432/NOME_DO_BANCO?sslmode=require
+DB_USER=USUARIO_DO_BANCO
+DB_PASSWORD=SENHA_DO_BANCO
+CORS_ORIGINS=https://chellengesprints-alpha4.vercel.app
+```
+
+Use host, banco e credenciais reais mostrados no painel, sem gravá-los no Git.
+Esse caminho usa o perfil padrão e exige somente as variáveis acima, além de
+`ADMIN_KEY` para as operações administrativas. Faça redeploy após salvá-las.
+O `/api/health` executa uma consulta real ao banco, não só um teste de processo.
+
+### Instalação nova com Blueprint
+
+O `render.yaml` declara o web service Docker e um PostgreSQL 17, vincula host,
+porta, banco, usuário e senha por `fromDatabase` e gera `ADMIN_KEY`. O perfil
+`render` constrói a URL JDBC; não é necessário converter uma URL com senha.
+No Render, use **New → Blueprint** e selecione este repositório. Para um serviço
+já existente, prefira a configuração manual acima para preservar sua URL.
+O Blueprint é um arquivo de implantação, não um comprovante de provisionamento.
+
+O plano gratuito do PostgreSQL expira após 30 dias; consulte as condições
+atuais antes de manter a aplicação por mais tempo.
+Fontes: [Blueprint](https://render.com/docs/blueprint-spec),
+[PostgreSQL](https://render.com/docs/postgresql-creating-connecting) e
+[plano gratuito](https://render.com/docs/free).
+
+### Verificação da publicação
+
+```powershell
+python scripts/check_deploy.py
+```
+
+O script faz apenas GET/OPTIONS, registra status e cabeçalhos em
+`docs/evidencias/deploy.json` e não cria ou altera perfis. A API respondeu 200
+para saúde e missões na verificação inicial. A origem Vercel ainda recebeu 403
+antes desta correção. A origem publicada agora é definida separadamente por
+`FRONTEND_ORIGIN`, evitando que um `CORS_ORIGINS` antigo com apenas localhost
+remova o acesso do frontend. Consulte o registro atualizado
+para o resultado da última execução.
+
+As capturas locais demonstram CRUD e moderação reais. O provisionamento do
+PostgreSQL na conta Render e a persistência após redeploy não foram auditados
+por estas verificações HTTP; o perfil e o Blueprint fornecem sua configuração.
 
 ### Reproduzir a documentação e gerar o ZIP
 

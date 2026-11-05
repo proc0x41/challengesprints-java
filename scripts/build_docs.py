@@ -1,5 +1,7 @@
 """Gera o PDF Java a partir do contrato, diagramas e capturas reais versionados."""
 from pathlib import Path
+from datetime import datetime
+import json
 import os
 import re
 import sys
@@ -20,6 +22,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 ROOT = Path(__file__).resolve().parent.parent
+DOCUMENT_DATE = datetime.now().strftime('%d/%m/%Y')
 API_VERSION = ET.parse(ROOT / 'pom.xml').getroot().find('{http://maven.apache.org/POM/4.0.0}version').text
 OUTPUT = ROOT / 'output/pdf/Alpha4_Sprint4_Java.pdf'
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
@@ -98,7 +101,7 @@ def page(text, size=A4):
     pdf.setStrokeColor(LINE)
     pdf.line(margin, 34, width - margin, 34)
     pdf.setFont(FONT, 8)
-    pdf.drawString(margin, 20, 'FIAP - 1TDSPW | Documentação técnica | 03/11/2026')
+    pdf.drawString(margin, 20, f'FIAP - 1TDSPW | Documentação técnica | {DOCUMENT_DATE}')
     pdf.drawRightString(width - margin, 20, str(page_count))
     title(text)
     pdf.bookmarkPage(f'page-{page_count}')
@@ -181,7 +184,7 @@ table([
 paragraph('<b>Turma:</b> 1TDSPW - FIAP, São Paulo<br/><b>Stack:</b> Java 17, Spring Boot 3.5.16, JDBC, H2/PostgreSQL e Maven Wrapper.')
 heading('Código e situação da publicação')
 paragraph('Repositório Java: <link href="https://github.com/proc0x41/challengesprints-java" color="#087f68">github.com/proc0x41/challengesprints-java</link>.<br/>Frontend: <link href="https://github.com/proc0x41/chellengesprints-alpha4" color="#087f68">github.com/proc0x41/chellengesprints-alpha4</link>.')
-paragraph('<b>Deploy em nuvem:</b> ainda pendente. Este documento comprova a execução e a integração locais; não apresenta uma URL pública de API como se estivesse publicada.')
+paragraph('<b>API no Render:</b> <link href="https://challengesprints-java.onrender.com/api" color="#087f68">https://challengesprints-java.onrender.com/api</link>.<br/><b>Frontend na Vercel:</b> <link href="https://chellengesprints-alpha4.vercel.app/" color="#087f68">https://chellengesprints-alpha4.vercel.app/</link>.')
 paragraph('As capturas desta documentação são reais e foram produzidas com o frontend consumindo o backend local. As pranchas de imagens e diagramas usam páginas ampliadas para manter textos e relações legíveis.', style='small')
 
 page('Objetivo, escopo e arquitetura')
@@ -208,7 +211,7 @@ for line in contract.splitlines():
         endpoint_rows.append([part.strip().replace('\\|', '/') for part in re.split(r'(?<!\\)\|', line)[1:-1]])
 for number, rows in enumerate([endpoint_rows[:11], endpoint_rows[11:]], 1):
     page(f'Endpoints REST ({number}/2)')
-    paragraph('Base local: <b>http://localhost:8080/api</b>. Corpo e respostas em JSON UTF-8. A versão textual completa do contrato está em docs/CONTRATO_API.md.')
+    paragraph('Base publicada: <b>https://challengesprints-java.onrender.com/api</b>.<br/>Base local: <b>http://localhost:8080/api</b>. Respostas JSON UTF-8. Contrato completo em docs/CONTRATO_API.md.')
     table([['Método', 'URI após /api', 'Acesso', 'OK', 'Falhas']] + rows,
           [53, 215, 100, 45, width - 2 * margin - 413])
     paragraph('<b>Bearer:</b> token da sessão do participante. <b>Administrativa:</b> cabeçalho X-Admin-Key igual a ADMIN_KEY. Chave administrativa ausente na configuração desabilita essas operações com 503. Nunca enviá-la ao bundle frontend.', style='small')
@@ -283,7 +286,7 @@ code('git clone https://github.com/proc0x41/challengesprints-java\ncd challenges
 paragraph('Para importar numa IDE, abra pom.xml como projeto Maven, selecione JDK 17 e aguarde a resolução das dependências. Execute SoulUpApplication. Em Linux/macOS, use sh mvnw nos mesmos objetivos Maven.')
 heading('Verificar o serviço e consumir pelo frontend')
 code('Invoke-RestMethod http://localhost:8080/api/health\nInvoke-RestMethod http://localhost:8080/api/missoes')
-paragraph('No frontend, configure VITE_API_URL=http://localhost:8080/api. O backend permite por padrão as origens http://localhost:5173 e http://127.0.0.1:5173. As chamadas usam fetch e respostas tipadas, com estados de carregamento, vazio e erro.')
+paragraph('No frontend local, configure VITE_API_URL=http://localhost:8080/api. Na Vercel, use VITE_API_URL=https://challengesprints-java.onrender.com/api e gere novo deploy. O backend permite localhost/127.0.0.1:5173 e a origem publicada definida por FRONTEND_ORIGIN, cujo padrão é https://chellengesprints-alpha4.vercel.app. CORS_ORIGINS configura origens adicionais.')
 heading('Executar o artefato empacotado')
 code(f'.\\mvnw.cmd package\njava -jar target/soul-up-api-{API_VERSION}.jar')
 paragraph('O banco H2 fica em data/soulup.mv.db e persiste entre reinicializações. Os testes usam outro banco, isolado em memória, e não alteram o banco do ambiente de demonstração.')
@@ -294,6 +297,7 @@ table([
     ['PORT', 'Porta HTTP; padrão 8080.'],
     ['ADMIN_KEY', 'Chave aleatória para CRUD e moderação; vazia resulta em 503. Nunca VITE_*.'],
     ['CORS_ORIGINS', 'Origens exatas permitidas, separadas por vírgula.'],
+    ['FRONTEND_ORIGIN', 'Origem publicada; padrão https://chellengesprints-alpha4.vercel.app.'],
     ['JDBC_DATABASE_URL', 'URL JDBC H2 local ou PostgreSQL para nuvem.'],
     ['DB_USER / DB_PASSWORD', 'Credenciais do banco, configuradas fora do repositório.'],
     ['SEED_DEMO', 'Habilita exemplos educacionais somente se a tabela estiver vazia.'],
@@ -302,9 +306,41 @@ paragraph('O arquivo .env.example é uma referência; Spring Boot não o lê aut
 heading('Evidências de verificação')
 paragraph('<b>11 testes de integração passaram</b>, sem falhas, erros ou testes ignorados: CRUD, validações de tipos estritos, limites após trim, hash do token, correção de evidência, snapshot de pontos, concorrência no envio e na aprovação, meia-noite de São Paulo, temporadas e CORS. Relatório reproduzível: .\\mvnw.cmd test.')
 paragraph('A revisão independente encontrou coerção indevida de JSON e divergência nos limites antes do trim; ambas foram corrigidas e cobertas por regressões HTTP. A integração real do frontend foi exercitada com persistência e moderação explícita. As capturas deste PDF documentam essas telas locais.')
-heading('Conteúdo da entrega e pendências')
+heading('Conteúdo da entrega')
 paragraph('O ZIP de fontes inclui código Java, pom.xml, Maven Wrapper, configurações, contratos, fontes/renderizações dos diagramas, capturas reais, script desta documentação e este PDF. Exclui .git, target, banco data, variáveis locais e tokens.')
-paragraph('<b>Permanece pendente o deploy na nuvem.</b> O link público será registrado no README e nesta documentação somente após publicação e verificação. O frontend exige também sua própria publicação na Vercel. Nenhuma dessas pendências é apresentada como concluída.')
+paragraph('API e frontend possuem as URLs públicas indicadas na capa. As próximas páginas apresentam a configuração PostgreSQL/Render incluída no projeto e o resultado verificável dos testes HTTP. Capturas locais e respostas remotas estão identificadas separadamente.')
+
+page('Produção: Render e PostgreSQL')
+heading('Serviço já publicado: manter a URL atual')
+paragraph('API: <link href="https://challengesprints-java.onrender.com/api" color="#087f68">https://challengesprints-java.onrender.com/api</link>. Frontend: <link href="https://chellengesprints-alpha4.vercel.app/" color="#087f68">https://chellengesprints-alpha4.vercel.app/</link>.')
+paragraph('Crie o PostgreSQL na mesma região da API. No serviço Java existente, configure os valores reais de host interno, banco e credenciais fornecidos pelo painel. O perfil padrão aceita a URL JDBC abaixo; nenhum segredo deve ser versionado.')
+code('JDBC_DATABASE_URL=jdbc:postgresql://HOST_INTERNO:5432/BANCO?sslmode=require\nDB_USER=USUARIO_DO_BANCO\nDB_PASSWORD=SENHA_DO_BANCO\nCORS_ORIGINS=https://chellengesprints-alpha4.vercel.app')
+paragraph('ADMIN_KEY deve ser longa e aleatória para CRUD de missões e moderação. Após salvar as variáveis, faça redeploy. O schema.sql inicializa tabelas e restrições no banco configurado, e GET /api/health verifica a conexão com SELECT 1.')
+heading('Instalação automatizada incluída no ZIP')
+paragraph('O render.yaml declara web service Docker e PostgreSQL 17 no Render, com plano free, rede privada e credenciais referenciadas por fromDatabase. O perfil render recebe DB_HOST, DB_PORT, DB_NAME, DB_USER e DB_PASSWORD e constrói a URL JDBC com TLS. ADMIN_KEY é gerada pelo Blueprint. Para instalação nova, use New / Blueprint e selecione o repositório.')
+paragraph('O arquivo de implantação não comprova que os recursos já foram provisionados na conta. Para preservar o serviço existente e sua URL, use as variáveis da seção anterior. PostgreSQL free expira após 30 dias; verificar as condições atuais do provedor antes de uso continuado.', style='small')
+paragraph('Referências: render.com/docs/blueprint-spec; render.com/docs/postgresql-creating-connecting; render.com/docs/free.', style='small')
+
+page('Publicação: verificações HTTP')
+deploy_path = ROOT / 'docs/evidencias/deploy.json'
+deploy = json.loads(deploy_path.read_text(encoding='utf-8'))
+paragraph(f'Registro real: <b>{escape(deploy["checked_at"])}</b>. Fonte: docs/evidencias/deploy.json, produzida por python scripts/check_deploy.py. Somente GET e OPTIONS; nenhum perfil foi criado ou alterado.')
+rows = [['Verificação', 'Método / recurso', 'Resposta']]
+labels = {'health': 'Saúde e consulta ao banco', 'missions': 'Listagem pública', 'cors_get': 'GET com origem Vercel', 'cors_preflight': 'Preflight de criação de perfil'}
+for check in deploy['checks']:
+    resource = check['url'].removeprefix(deploy['api_url'])
+    rows.append([labels[check['name']], check['method'] + ' ' + resource, str(check.get('status', 'Timeout/erro de rede'))])
+table(rows, [185, 185, width - 2 * margin - 370])
+paragraph('No pacote, FRONTEND_ORIGIN permite a origem exata da Vercel mesmo se CORS_ORIGINS ainda contiver apenas localhost. Para alterar o domínio publicado, configure FRONTEND_ORIGIN sem barra final. Origens não listadas e domínios com sufixos semelhantes continuam rejeitados. Faça redeploy para aplicar o código atualizado.')
+paragraph('O registro HTTP confirma somente o comportamento observado naquele horário. Não identifica se o servidor usa H2 ou PostgreSQL e não comprova persistência após redeploy. A configuração PostgreSQL está pronta no código e no Blueprint; sua aplicação na conta Render é uma etapa de implantação.')
+heading('Critérios reproduzíveis de aceite')
+paragraph('Saúde 200; missões e detalhes 200; GET com Origin da Vercel 200 e Access-Control-Allow-Origin igual à origem; OPTIONS de /participantes 204. Depois de conectar o PostgreSQL, um perfil de teste deve continuar acessível com seu token após reiniciar apenas a API. Use um ambiente de demonstração e remova o perfil ao concluir.')
+pg_path = ROOT / 'docs/evidencias/postgresql-local.json'
+pg_check = json.loads(pg_path.read_text(encoding='utf-8'))
+assert pg_check['success'] and pg_check['api_version'] == API_VERSION
+heading('Compatibilidade com PostgreSQL real')
+paragraph(f'Verificação local isolada em {escape(pg_check["checked_at"])}: PostgreSQL {escape(pg_check["postgres_version"])} e API {API_VERSION}, perfil render. Criação/atualização de perfil, evidência, aprovação, ranking e exclusão passaram. Perfil, token e pontos continuaram disponíveis após reiniciar a API. Relatório: docs/evidencias/postgresql-local.json.', style='small')
+paragraph('Este teste usa um PostgreSQL Docker local, não a conta Render. TLS foi desabilitado somente nessa conexão local; o Blueprint mantém sslmode=require. O ZIP inclui ambos os relatórios e os scripts de reprodução, sem credenciais.', style='small')
 
 pdf.save()
 print(f'PDF criado: {OUTPUT.relative_to(ROOT)} ({page_count} páginas).')
