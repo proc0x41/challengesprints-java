@@ -1,0 +1,135 @@
+{
+  "checked_at": "2026-11-04T23:32:20.715080-03:00",
+  "api_url": "https://challengesprints-java.onrender.com/api",
+  "origin": "https://chellengesprints-alpha4.vercel.app",
+  "checks": [
+    {
+      "name": "health",
+      "url": "https://challengesprints-java.onrender.com/api/health",
+      "method": "GET",
+      "request_headers": {
+        "Accept": "application/json"
+      },
+      "status": 200,
+      "response_headers": {
+        "Date": "Thu, 05 Nov 2026 02:32:20 GMT",
+        "Content-Type": "application/json",
+        "Transfer-Encoding": "chunked",
+        "Connection": "close",
+        "cf-cache-status": "DYNAMIC",
+        "rndr-id": "2e34d222-47b9-4839",
+        "Server": "cloudflare",
+        "vary": "Origin",
+        "x-render-origin-server": "Render",
+        "CF-RAY": "a55872872c7c4241-EWR",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "body": {
+        "status": "ok",
+        "service": "alpha4-soul-up"
+      }
+    },
+    {
+      "name": "missions",
+      "url": "https://challengesprints-java.onrender.com/api/missoes",
+      "method": "GET",
+      "request_headers": {
+        "Accept": "application/json"
+      },
+      "status": 200,
+      "response_headers": {
+        "Date": "Thu, 05 Nov 2026 02:32:20 GMT",
+        "Content-Type": "application/json",
+        "Transfer-Encoding": "chunked",
+        "Connection": "close",
+        "cf-cache-status": "DYNAMIC",
+        "rndr-id": "323a0fff-6b04-4237",
+        "Server": "cloudflare",
+        "vary": "Origin",
+        "x-render-origin-server": "Render",
+        "CF-RAY": "a5587287db0c41f8-EWR",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "body": [
+        {
+          "id": "06fd68fb-76a4-4529-b2a1-87b5a31cb77d",
+          "title": "Compartilhe uma orientação de descarte",
+          "description": "Converse com uma pessoa sobre a coleta e o descarte corretos na sua região. Descreva a orientação compartilhada sem identificar a outra pessoa. Pontuação demonstrativa definida para este protótipo.",
+          "category": "social",
+          "points": 30,
+          "requiresEvidence": true,
+          "status": "disponivel"
+        },
+        {
+          "id": "5e22fbc0-ba15-4dd6-b718-91e965824fb4",
+          "title": "Confira a informação antes de compartilhar",
+          "description": "Consulte uma fonte pública oficial sobre saneamento ou resíduos do município. Descreva a informação e a fonte consultada. Não envie dados pessoais. Pontos demonstrativos, sem equivalência ambiental calculada.",
+          "category": "governanca",
+          "points": 25,
+          "requiresEvidence": true,
+          "status": "disponivel"
+        },
+        {
+          "id": "afaa2508-0c9d-40bf-96e1-cbe312598ed6",
+          "title": "Separe os recicláveis da sua rotina",
+          "description": "Consulte as orientações de coleta do seu município. Separe materiais limpos e secos aceitos localmente e descreva como organizou o descarte. Missão educacional de demonstração: não informa redução científica de CO₂.",
+          "category": "ambiental",
+          "points": 20,
+          "requiresEvidence": true,
+          "status": "disponivel"
+        }
+      ]
+    },
+    {
+      "name": "cors_get",
+      "url": "https://challengesprints-java.onrender.com/api/missoes",
+      "method": "GET",
+      "request_headers": {
+        "Accept": "application/json",
+        "Origin": "https://chellengesprints-alpha4.vercel.app"
+      },
+      "status": 403,
+      "response_headers": {
+        "Date": "Thu, 05 Nov 2026 02:32:20 GMT",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Transfer-Encoding": "chunked",
+        "Connection": "close",
+        "cf-cache-status": "DYNAMIC",
+        "rndr-id": "5169e6fb-6b4a-4411",
+        "Server": "cloudflare",
+        "vary": "Origin",
+        "x-render-origin-server": "Render",
+        "CF-RAY": "a5587287df100c84-EWR",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "body": "{\"message\":\"Origem não autorizada.\"}"
+    },
+    {
+      "name": "cors_preflight",
+      "url": "https://challengesprints-java.onrender.com/api/participantes",
+      "method": "OPTIONS",
+      "request_headers": {
+        "Accept": "application/json",
+        "Origin": "https://chellengesprints-alpha4.vercel.app",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "Content-Type,Authorization"
+      },
+      "status": 403,
+      "response_headers": {
+        "Date": "Thu, 05 Nov 2026 02:32:20 GMT",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Transfer-Encoding": "chunked",
+        "Connection": "close",
+        "cf-cache-status": "DYNAMIC",
+        "rndr-id": "c6699935-70e4-48e7",
+        "Server": "cloudflare",
+        "vary": "Origin",
+        "x-render-origin-server": "Render",
+        "CF-RAY": "a55872875ae3134a-EWR",
+        "alt-svc": "h3=\":443\"; ma=86400"
+      },
+      "body": "{\"message\":\"Origem não autorizada.\"}"
+    }
+  ],
+  "scope": "HTTP GET/OPTIONS; nao verifica o provedor do banco nem persistencia apos redeploy"
+}
